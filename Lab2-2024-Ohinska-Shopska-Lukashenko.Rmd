@@ -176,7 +176,10 @@ hist(num_errors, breaks=-0.5:4.5, col="skyblue",
 ```
 
 The random variable that counts the number of wrong bits in a decoded message has Binomial distribution, 
-because it has a fixed number of independent trials, every outcome is either success or loss, probability of success is always the same.
+because it has a fixed number of independent trials, every outcome is either success or loss, 
+probability of success is always the same.
+In our case, as we are 20th team, p = 0.2, so most part of the result will be distributed to the left, 
+as 0.2 is not that high probability for the error.
 
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
