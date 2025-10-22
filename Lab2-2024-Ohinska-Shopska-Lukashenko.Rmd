@@ -107,20 +107,6 @@ decode <- function(r){
 }
 
 success <- numeric(N)
-for (i in 1:N) {
-  m <- sample(0:1, 4, replace=TRUE)
-  coded_word <- encode_message(m, G)
-  r <- (coded_word + rbinom(7,1,p)) %% 2
-  
-  r_corrected <- correction(r)
-  final <- decode(r_corrected)
-  success[i] <- all(final == m)
-}
-
-hat_p <- mean(success)
-p_star <- (1-p)^7 + 7*p*(1-p)^6
-cat("Simulation hat_p =", hat_p, "\n")
-cat("Theoretical p* =", p_star, "\n")
 ```
 
 #### Next, generate the messages
@@ -131,18 +117,33 @@ cat("Theoretical p* =", p_star, "\n")
 message_generator <- function(N) {
   matrix(sample(c(0,1), 4*N, replace = TRUE), nrow = N)
 }  
-messages <- message_generator(100)
+messages <- message_generator(10000)
 codewords <- (messages %*% G) %% 2
 ```
 
 #### Generate random errors; do not forget that they occur with probability $p$! Next, generate the received messages
 
 ```{r}
-#  errors <- ...
-#  received <-   
+errors <- matrix(rbinom(N*7, 1, p), nrow=N)
+
+received <- (codewords + errors) %% 2
 ```
 
 The next steps include detecting the errors in the received messages, correcting them, and then decoding the obtained messages. After this, you can continue with calculating all the quantities of interest
+```{r}
+corrected <- t(apply(received, 1, correction))
+decoded <- t(apply(corrected, 1, decode))
+
+success <- apply(decoded == messages, 1, all)
+
+hat_p <- mean(success)
+p_star <- (1-p)^7 + 7*p*(1-p)^6
+cat("Simulation hat_p =", hat_p, "\n")
+cat("Theoretical p* =", p_star, "\n")
+
+```
+
+For large N, the law of large numbers says that  $\hat p$ ~ $p^*$, because the fraction of successfull transmissions converges to the expected success probability.
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
 
