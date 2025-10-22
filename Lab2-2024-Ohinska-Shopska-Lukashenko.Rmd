@@ -159,7 +159,6 @@ eps <- 1.96 * SE # 1.96 is z-value for 95% probability
 cat("Half-length of 95% confidence interval: ", eps, "\n")
 N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star))/(0.03*0.03)
 cat("Required N for epsilon <= 0.03:", N_new, "\n")
-
 ```
 
 Here we've got the standard error (shows how our estimation of p_hat can differ from actual p*).
@@ -167,6 +166,17 @@ Half of the interval shows how large the distance from p^ to p* can be with prob
 For this distance to be less or equal to 0.03, we need N_new simulations.
 Larger number of simulations gives more precise estimation of p^ and narrows the distance from theoretical value.
 
+```{r}
+num_errors <- rbinom(N, size=4, prob=p)
+
+# Побудова гістограми
+hist(num_errors, breaks=-0.5:4.5, col="skyblue",
+     main="Histogram of number of errors per 4-bit message",
+     xlab="Number of errors k", ylab="Frequency")
+```
+
+The random variable that counts the number of wrong bits in a decoded message has Binomial distribution, 
+because it has a fixed number of independent trials, every outcome is either success or loss, probability of success is always the same.
 
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
