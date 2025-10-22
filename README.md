@@ -1,1 +1,0 @@
-# ps_lab2_rv_limit_theorem
