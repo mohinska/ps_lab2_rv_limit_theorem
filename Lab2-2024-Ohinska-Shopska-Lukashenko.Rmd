@@ -65,24 +65,62 @@ $$
 ```{r}
 # your team id number 
                           ###
-id <- 50                  ### Change to the correct id!
+id <- 20                  ### Change to the correct id!
                           ###
 set.seed(id)
+N = 10000
 p <- id/100
 # matrices G and H
 G <- matrix(c(1, 1, 1, 0, 0, 0, 0,
-		1, 0, 0, 1, 1, 0, 0,
-		0, 1, 0, 1, 0, 1, 0,
-		1, 1, 0, 1, 0, 0, 1), nrow = 4, byrow = TRUE)
+  1, 0, 0, 1, 1, 0, 0,
+  0, 1, 0, 1, 0, 1, 0,
+  1, 1, 0, 1, 0, 0, 1), nrow = 4, byrow = TRUE)
 H <- t(matrix(c(1, 0, 1, 0, 1, 0, 1,
-		0, 1, 1, 0, 0, 1, 1,
-		0, 0, 0, 1, 1, 1, 1), nrow = 3, byrow = TRUE))
-# cat("The matrix G is: \n") 
-#G  
-#cat("The matrix H is: \n") 
-#H
-#cat("The product GH must be zero: \n")
-#(G%*%H) %%2
+  0, 1, 1, 0, 0, 1, 1,
+  0, 0, 0, 1, 1, 1, 1), nrow = 3, byrow = TRUE))
+ cat("The matrix G is: \n") 
+G  
+cat("The matrix H is: \n") 
+H
+cat("The product GH must be zero: \n")
+(G%*%H) %%2
+
+encode_message <- function(m, G){
+  as.vector((m %*% G) %% 2)
+}
+
+syndrome <- function(r){
+  as.vector((matrix(r, nrow=1) %*% H) %% 2)
+}
+
+correction <- function(r) {
+  z <- syndrome(r)
+  pos <- z[1] + 2*z[2] + 4*z[3]
+  if (pos != 0) {
+    r[pos] <- (r[pos] + 1) %%2
+  }
+  return(r)
+}
+
+decode <- function(r){
+  return(c(r[3], r[5], r[6], r[7]))
+}
+
+success <- numeric(N)
+for (i in 1:N) {
+  m <- sample(0:1, 4, replace=TRUE)
+  coded_word <- encode_message(m, G)
+  r <- (coded_word + rbinom(7,1,p)) %% 2
+  
+  r_corrected <- correction(r)
+  final <- decode(r_corrected)
+  success[i] <- all(final == m)
+}
+
+hat_p <- mean(success)
+p_star <- (1-p)^7 + 7*p*(1-p)^6
+cat("Simulation hat_p =", hat_p, "\n")
+cat("Theoretical p* =", p_star, "\n")
 ```
 
 #### Next, generate the messages
