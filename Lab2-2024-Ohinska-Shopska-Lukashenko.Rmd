@@ -63,26 +63,49 @@ $$
 #### First, we set the **id** of the team and define the probability $p$ and the generator and parity-check matrices $G$ and $H$
 
 ```{r}
-# your team id number
-                          ###
-id <- 50                  ### Change to the correct id!
-                          ###
+id <- 20
+
 set.seed(id)
-p <- id/100
+N = 10000
+p <- id / 100
 # matrices G and H
 G <- matrix(c(1, 1, 1, 0, 0, 0, 0,
-		1, 0, 0, 1, 1, 0, 0,
-		0, 1, 0, 1, 0, 1, 0,
-		1, 1, 0, 1, 0, 0, 1), nrow = 4, byrow = TRUE)
+  1, 0, 0, 1, 1, 0, 0,
+  0, 1, 0, 1, 0, 1, 0,
+  1, 1, 0, 1, 0, 0, 1), nrow = 4, byrow = TRUE)
 H <- t(matrix(c(1, 0, 1, 0, 1, 0, 1,
-		0, 1, 1, 0, 0, 1, 1,
-		0, 0, 0, 1, 1, 1, 1), nrow = 3, byrow = TRUE))
-# cat("The matrix G is: \n")
-#G
-#cat("The matrix H is: \n")
-#H
-#cat("The product GH must be zero: \n")
-#(G%*%H) %%2
+  0, 1, 1, 0, 0, 1, 1,
+  0, 0, 0, 1, 1, 1, 1), nrow = 3, byrow = TRUE))
+ cat("The matrix G is: \n")
+G
+cat("The matrix H is: \n")
+H
+cat("The product GH must be zero: \n")
+(G%*%H) %%2
+
+encode_message <- function(m, G){
+  as.vector((m %*% G) %% 2)
+}
+
+syndrome <- function(r) {
+  as.vector((matrix(r, nrow=1) %*% H) %% 2)    #transform vector r (7-bit encoded word) into a matrix 1x7
+}                                              #then multiplies matrix and H to get a syndrome. if z = (0, 0, 0),
+                                               #then message is transmitted correctly, but if no, there will 1 on the position of a mistake
+
+correction <- function(r) {
+  z <- syndrome(r)         # calculate the syndrome
+  pos <- z[1] + 2 * z[2] + 4 * z[3]    #define the position of the error
+  if (pos != 0) {
+    r[pos] <- (r[pos] + 1) %% 2  # change bit if incorrect
+  }
+  return(r)
+}
+
+decode <- function(r) {
+  return(c(r[3], r[5], r[6], r[7]))     # to decode take only informational bits
+}
+
+success <- numeric(N)     # resulting vector
 ```
 
 #### Next, generate the messages
@@ -91,20 +114,71 @@ H <- t(matrix(c(1, 0, 1, 0, 1, 0, 1,
 # generate N messages
 
 message_generator <- function(N) {
-  matrix(sample(c(0,1), 4*N, replace = TRUE), nrow = N)
+  matrix(sample(c(0, 1), 4 * N, replace = TRUE), nrow = N)
 }
-messages <- message_generator(100)
+messages <- message_generator(10000)
 codewords <- (messages %*% G) %% 2
 ```
 
 #### Generate random errors; do not forget that they occur with probability $p$! Next, generate the received messages
 
 ```{r}
-#  errors <- ...
-#  received <-
+errors <- matrix(rbinom(N * 7, 1, p), nrow = N)
+
+received <- (codewords + errors) %% 2 # matrix of incorreclty recieved messages
 ```
 
 The next steps include detecting the errors in the received messages, correcting them, and then decoding the obtained messages. After this, you can continue with calculating all the quantities of interest
+```{r}
+corrected <- t(apply(received, 1, correction))
+decoded <- t(apply(corrected, 1, decode))
+
+success <- apply(decoded == messages, 1, all)
+
+hat_p <- mean(success) # empirical (real)
+p_star <- (1 - p)^7 + 7 * p * (1 - p)^6 # theoretical
+cat("Simulation hat_p =", hat_p, "\n")
+cat("Theoretical p* =", p_star, "\n")
+
+```
+encode_message method codes our 4-byte message into 7-byte message
+syndrome(r) method calculates the syndrome vector for checking errors
+correction(r) finds and corrects olne-byte errors in coded word
+decode(r) returns 4-byte message from corrected version of the word
+After this we have a natrix of random messages and then them coded. Then we generate message with errors with equal probability = p for all to have errors.
+Later every received word goes through the function of correction where one-byte mistakes get corrected and later decoded into 4-byte.
+Finally we calculate number of successes in transmitting words with no mistakes
+hat_p - empirical probability of success, p_star - theoretical probability of success.
+
+For large N, the law of large numbers says that  $\hat p$ ~ $p^*$, because the fraction of successfull transmissions converges to the expected success probability.
+
+```{r}
+SE <- sqrt(hat_p * (1 - hat_p) / N_new)
+eps <- 1.96 * SE # 1.96 is z-value for 95% probability
+cat("Half-length of 95% confidence interval: ", eps, "\n")
+N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star)) / (0.03 * 0.03)
+cat("Required N for epsilon <= 0.03:", N_new, "\n")
+```
+
+Here we've got the standard error (shows how our estimation of p_hat can differ from actual p*).
+Half of the interval shows how large the distance from p^ to p* can be with probability 95%.
+For this distance to be less or equal to 0.03, we need N_new simulations.
+Larger number of simulations gives more precise estimation of p^ and narrows the distance from theoretical value.
+
+```{r}
+num_errors <- rbinom(N, size = 4, prob = p)
+
+hist(num_errors, breaks = -0.5:4.5, col = "skyblue",
+     main = "Histogram of number of errors per 4-bit message",
+     xlab = "Number of errors k", ylab = "Frequency")
+```
+
+The random variable that counts the number of wrong bits in a decoded message has Binomial distribution, 
+because it has a fixed number of independent trials, every outcome is either success or loss, 
+probability of success is always the same.
+In our case, as we are 20th team, p = 0.2, so most part of the result will be distributed to the left, 
+as 0.2 is not that high probability for the error.
+
 
 **Do not forget to include several sentences summarizing your work and the conclusions you have made!**
 
@@ -332,19 +406,75 @@ curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
 
     2.  Let $X \sim \mathscr{N}(\mu,\sigma^2)$ with $\mu = teamidnumber$ and $\sigma^{2} = 2\times teamidnumber+7$. Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ and $y_1,y_2,\dots,y_{100}$ of $Y := \frac{1}{X}$ to calculate the values of $\frac{1}{\overline{\textbf{X}}}$ and $\overline{\textbf{Y}}$. Comment on the received results;
 
-        ```{r}
-        mu <- 0 #change this!
-        sigma <- 1 #change this
-        N <- 100
+```{r}
+mu <- 20
+sigma <- sqrt(47)
+N <- 100
 
-        # YOUR CODE HERE
-        ```
+X <- rnorm(N, mean = mu, sd = sigma)
+
+Y <- 1 / X
+
+X_bar <- mean(X)
+Y_bar <- mean(Y)
+one_over_X_bar <- 1 / X_bar
+
+cat("X_bar:", X_bar, "\n")
+cat("1/X̄:", one_over_X_bar, "\n")
+cat("Ȳ", Y_bar, "\n")
+cat("Difference (Ȳ - 1/X̄):", Y_bar - one_over_X_bar, "\n")
+
+```
+
+X_bar is very close to the true mean, no matter how many times we run the code. It tells us about correctness of the simulation.
+Ȳ and 1/X are different because of non-linearity of the transformation
+Jensen's Inequality states that for a random variable X and a convex function f(x) (in our case 1/X), the following holds:
+$\mathbb{E}(\frac{1}{X}) > \frac{1}{\mathbb{E(X)}}$;
 
     3.  Let $X$ and $Y$ be exponentially distributed r.v.'s with parameter $\lambda = 2$. Set $Z := \log{X} + 5$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Y$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Z$. Explain the results. Comment on the difference of relations between the pairs of random variables. Which pair of r.v.'s is dependent and which one is similar?
 
-        ```{r}
-        # YOUR CODE HERE
-        ```
+```{r}
+set.seed(20)
+lambda <- 2
+X <- rexp(N, rate = lambda)
+Y <- rexp(N, rate = lambda)
+
+Z <- log(X) + 5
+
+qqplot(X, Y, main = "Quantile-quantile plot of X and Y", xlab = "Quantiles of X", ylab = "Quantiles of Y")
+plot(X, Y, main="Scatterplot of X and Y", xlab = "X", ylab = "Y")
+
+```
+
+Scatterplot of X and Y is chaotic and dispersed because each point x_i, y_i represents a point generated independently of one another.
+Since variables X and Y do not provide any information about one another, there is no relation between them.
+This results in a chaotic and dispersed scatterplot.
+In contrast, Q-Q plot does not examine the relation between individual observations, but rather compares whole distributions. 
+Before constructing a qq plot, both samples are sorted and corresponding quantiles are plotted. As X and Y follow the same theoretical distribution,
+their quantiles coincide and increase proportionally, so points align approximately along a straight line.
+
+```{r}
+set.seed(20)
+lambda <- 2
+X <- rexp(N, rate = lambda)
+Y <- rexp(N, rate = lambda)
+
+Z <- log(X) + 5
+
+qqplot(X, Z, main = "Quantile-quantile plot of X and Z", xlab = "Quantiles of X", ylab = "Quantiles of Z")
+plot(X, Z, main="Scatterplot of X and Z", xlab = "X", ylab = "Z")
+```
+
+Scatterplot of X and Y forms a smooth, increasing curve because Z is a deterministic transformation of X.
+This smooth structure indicates a strong relation between two variables.
+In contrast, Q-Q plot deviates from straight line because the logarihtmic transformation of changes the shape of 
+the distribution, while X is exponentially distributed, Z becomes approximately symmetric and shifted.
+So q-q plot reveals that X and Z have different distributions.
+
+Dependent pairs: X and Z
+Independent pairs: X and Y
+We can observe their dependecies on plot above.
+X and Y are similar because they have the same distribution.
 
     ------------------------------------------------------------------------
 
