@@ -352,10 +352,13 @@ cat("Chernoff-Gaussian Bound: n <=", n_chernoff, "\n")
 #### First, generate samples an sample means:
 
 ```{r}
-nu1 <- 1  # change this!
-K <- 1e3
-n <- 5
+team_id_number <- 20 
+
+nu1 <- team_id_number + 10
+K <- 10000
+n_values <- c(5, 10, 50)
 sample_means <- colMeans(matrix(rexp(n*K, rate = nu1), nrow=n))
+
 ```
 
 #### Next, calculate the parameters of the standard normal approximation
