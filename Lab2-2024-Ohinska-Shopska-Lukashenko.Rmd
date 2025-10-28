@@ -63,10 +63,8 @@ $$
 #### First, we set the **id** of the team and define the probability $p$ and the generator and parity-check matrices $G$ and $H$
 
 ```{r}
-# your team id number 
-                          ###
-id <- 20                  ### Change to the correct id!
-                          ###
+id <- 20
+
 set.seed(id)
 N = 10000
 p <- id/100
@@ -154,10 +152,10 @@ hat_p - empirical probability of success, p_star - theoretical probability of su
 For large N, the law of large numbers says that  $\hat p$ ~ $p^*$, because the fraction of successfull transmissions converges to the expected success probability.
 
 ```{r}
-SE <- sqrt(hat_p * (1 - hat_p)/N_new)
+SE <- sqrt(hat_p * (1 - hat_p) / N_new)
 eps <- 1.96 * SE # 1.96 is z-value for 95% probability
 cat("Half-length of 95% confidence interval: ", eps, "\n")
-N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star))/(0.03*0.03)
+N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star)) / (0.03 * 0.03)
 cat("Required N for epsilon <= 0.03:", N_new, "\n")
 ```
 
@@ -167,12 +165,11 @@ For this distance to be less or equal to 0.03, we need N_new simulations.
 Larger number of simulations gives more precise estimation of p^ and narrows the distance from theoretical value.
 
 ```{r}
-num_errors <- rbinom(N, size=4, prob=p)
+num_errors <- rbinom(N, size = 4, prob = p)
 
-# Побудова гістограми
-hist(num_errors, breaks=-0.5:4.5, col="skyblue",
-     main="Histogram of number of errors per 4-bit message",
-     xlab="Number of errors k", ylab="Frequency")
+hist(num_errors, breaks = -0.5:4.5, col = "skyblue",
+     main = "Histogram of number of errors per 4-bit message",
+     xlab = "Number of errors k", ylab = "Frequency")
 ```
 
 The random variable that counts the number of wrong bits in a decoded message has Binomial distribution, 
@@ -307,19 +304,75 @@ curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
 
     2.  Let $X \sim \mathscr{N}(\mu,\sigma^2)$ with $\mu = teamidnumber$ and $\sigma^{2} = 2\times teamidnumber+7$. Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ and $y_1,y_2,\dots,y_{100}$ of $Y := \frac{1}{X}$ to calculate the values of $\frac{1}{\overline{\textbf{X}}}$ and $\overline{\textbf{Y}}$. Comment on the received results;
 
-        ```{r}
-        mu <- 0 #change this!
-        sigma <- 1 #change this
-        N <- 100
+```{r}
+mu <- 20
+sigma <- sqrt(47)
+N <- 100
 
-        # YOUR CODE HERE
-        ```
+X <- rnorm(N, mean = mu, sd = sigma)
+
+Y <- 1 / X
+
+X_bar <- mean(X)
+Y_bar <- mean(Y)
+one_over_X_bar <- 1 / X_bar
+
+cat("X_bar:", X_bar, "\n")
+cat("1/X̄:", one_over_X_bar, "\n")
+cat("Ȳ", Y_bar, "\n")
+cat("Difference (Ȳ - 1/X̄):", Y_bar - one_over_X_bar, "\n")
+
+```
+
+X_bar is very close to the true mean, no matter how many times we run the code. It tells us about correctness of the simulation.
+Ȳ and 1/X are different because of non-linearity of the transformation
+Jensen's Inequality states that for a random variable X and a convex function f(x) (in our case 1/X), the following holds:
+$\mathbb{E}(\frac{1}{X}) > \frac{1}{\mathbb{E(X)}}$;
 
     3.  Let $X$ and $Y$ be exponentially distributed r.v.'s with parameter $\lambda = 2$. Set $Z := \log{X} + 5$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Y$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Z$. Explain the results. Comment on the difference of relations between the pairs of random variables. Which pair of r.v.'s is dependent and which one is similar?
 
-        ```{r}
-        # YOUR CODE HERE
-        ```
+```{r}
+set.seed(20)
+lambda <- 2
+X <- rexp(N, rate = lambda)
+Y <- rexp(N, rate = lambda)
+
+Z <- log(X) + 5
+
+qqplot(X, Y, main = "Quantile-quantile plot of X and Y", xlab = "Quantiles of X", ylab = "Quantiles of Y")
+plot(X, Y, main="Scatterplot of X and Y", xlab = "X", ylab = "Y")
+
+```
+
+Scatterplot of X and Y is chaotic and dispersed because each point x_i, y_i represents a point generated independently of one another.
+Since variables X and Y do not provide any information about one another, there is no relation between them.
+This results in a chaotic and dispersed scatterplot.
+In contrast, Q-Q plot does not examine the relation between individual observations, but rather compares whole distributions. 
+Before constructing a qq plot, both samples are sorted and corresponding quantiles are plotted. As X and Y follow the same theoretical distribution,
+their quantiles coincide and increase proportionally, so points align approximately along a straight line.
+
+```{r}
+set.seed(20)
+lambda <- 2
+X <- rexp(N, rate = lambda)
+Y <- rexp(N, rate = lambda)
+
+Z <- log(X) + 5
+
+qqplot(X, Z, main = "Quantile-quantile plot of X and Z", xlab = "Quantiles of X", ylab = "Quantiles of Z")
+plot(X, Z, main="Scatterplot of X and Z", xlab = "X", ylab = "Z")
+```
+
+Scatterplot of X and Y forms a smooth, increasing curve because Z is a deterministic transformation of X.
+This smooth structure indicates a strong relation between two variables.
+In contrast, Q-Q plot deviates from straight line because the logarihtmic transformation of changes the shape of 
+the distribution, while X is exponentially distributed, Z becomes approximately symmetric and shifted.
+So q-q plot reveals that X and Z have different distributions.
+
+Dependent pairs: X and Z
+Independent pairs: X and Y
+We can observe their dependecies on plot above.
+X and Y are similar because they have the same distribution.
 
     ------------------------------------------------------------------------
 
