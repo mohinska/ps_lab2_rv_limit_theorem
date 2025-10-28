@@ -67,7 +67,7 @@ id <- 20
 
 set.seed(id)
 N = 10000
-p <- id/100
+p <- id / 100
 # matrices G and H
 G <- matrix(c(1, 1, 1, 0, 0, 0, 0,
   1, 0, 0, 1, 1, 0, 0,
@@ -76,9 +76,9 @@ G <- matrix(c(1, 1, 1, 0, 0, 0, 0,
 H <- t(matrix(c(1, 0, 1, 0, 1, 0, 1,
   0, 1, 1, 0, 0, 1, 1,
   0, 0, 0, 1, 1, 1, 1), nrow = 3, byrow = TRUE))
- cat("The matrix G is: \n") 
-G  
-cat("The matrix H is: \n") 
+ cat("The matrix G is: \n")
+G
+cat("The matrix H is: \n")
 H
 cat("The product GH must be zero: \n")
 (G%*%H) %%2
@@ -87,24 +87,25 @@ encode_message <- function(m, G){
   as.vector((m %*% G) %% 2)
 }
 
-syndrome <- function(r){
-  as.vector((matrix(r, nrow=1) %*% H) %% 2)
-}
+syndrome <- function(r) {
+  as.vector((matrix(r, nrow=1) %*% H) %% 2)    #transform vector r (7-bit encoded word) into a matrix 1x7
+}                                              #then multiplies matrix and H to get a syndrome. if z = (0, 0, 0),
+                                               #then message is transmitted correctly, but if no, there will 1 on the position of a mistake
 
 correction <- function(r) {
-  z <- syndrome(r)
-  pos <- z[1] + 2*z[2] + 4*z[3]
+  z <- syndrome(r)         # calculate the syndrome
+  pos <- z[1] + 2 * z[2] + 4 * z[3]    #define the position of the error
   if (pos != 0) {
-    r[pos] <- (r[pos] + 1) %%2
+    r[pos] <- (r[pos] + 1) %% 2  # change bit if incorrect
   }
   return(r)
 }
 
-decode <- function(r){
-  return(c(r[3], r[5], r[6], r[7]))
+decode <- function(r) {
+  return(c(r[3], r[5], r[6], r[7]))     # to decode take only informational bits
 }
 
-success <- numeric(N)
+success <- numeric(N)     # resulting vector
 ```
 
 #### Next, generate the messages
@@ -113,8 +114,8 @@ success <- numeric(N)
 # generate N messages
 
 message_generator <- function(N) {
-  matrix(sample(c(0,1), 4*N, replace = TRUE), nrow = N)
-}  
+  matrix(sample(c(0, 1), 4 * N, replace = TRUE), nrow = N)
+}
 messages <- message_generator(10000)
 codewords <- (messages %*% G) %% 2
 ```
@@ -122,9 +123,9 @@ codewords <- (messages %*% G) %% 2
 #### Generate random errors; do not forget that they occur with probability $p$! Next, generate the received messages
 
 ```{r}
-errors <- matrix(rbinom(N*7, 1, p), nrow=N)
+errors <- matrix(rbinom(N * 7, 1, p), nrow = N)
 
-received <- (codewords + errors) %% 2
+received <- (codewords + errors) %% 2 # matrix of incorreclty recieved messages
 ```
 
 The next steps include detecting the errors in the received messages, correcting them, and then decoding the obtained messages. After this, you can continue with calculating all the quantities of interest
@@ -134,8 +135,8 @@ decoded <- t(apply(corrected, 1, decode))
 
 success <- apply(decoded == messages, 1, all)
 
-hat_p <- mean(success)
-p_star <- (1-p)^7 + 7*p*(1-p)^6
+hat_p <- mean(success) # empirical (real)
+p_star <- (1 - p)^7 + 7 * p * (1 - p)^6 # theoretical
 cat("Simulation hat_p =", hat_p, "\n")
 cat("Theoretical p* =", p_star, "\n")
 
