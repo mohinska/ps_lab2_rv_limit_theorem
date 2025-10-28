@@ -364,26 +364,176 @@ sample_means <- colMeans(matrix(rexp(n*K, rate = nu1), nrow=n))
 #### Next, calculate the parameters of the standard normal approximation
 
 ```{r}
-mu <- 0       # change this!
-sigma <- 1    # change this!
+mu <- 1 / nu1
+max_differences <- data.frame(n = n_values, max_diff = NA)
+
 ```
 
 #### We can now plot ecdf and cdf
 
 ```{r}
-xlims <- c(mu-3*sigma,mu+3*sigma)
-Fs <- ecdf(sample_means)
-plot(Fs,
-     xlim = xlims,
-     col = "blue",
-     lwd = 2,
-     main = "Comparison of ecdf and cdf")
-curve(pnorm(x, mean = mu, sd = sigma), col = "red", lwd = 2, add = TRUE)
+par(mfrow = c(2, 3)) 
+
+cat("--- Running CLT Simulation ---\n")
+
+for (i in 1:length(n_values)) {
+  n <- n_values[i] 
+  sample_means <- colMeans(matrix(rexp(n * K, rate = nu1), nrow = n))
+  sigma <- 1 / (nu1 * sqrt(n))
+  
+  xlims <- c(mu - 4 * sigma, mu + 4 * sigma)
+
+  hist(sample_means,
+       probability = TRUE,
+       breaks = 100,
+       xlim = xlims,
+       col = "lightblue",
+       border = "grey",
+       main = paste("Histogram of Sample Means, n =", n),
+       xlab = "Sample Mean")
+  
+  # Add the theoretical normal DENSITY (PDF) curve
+  curve(dnorm(x, mean = mu, sd = sigma), 
+        col = "red", 
+        lwd = 2, 
+        add = TRUE)
+  Fs <- ecdf(sample_means)
+  
+  plot(Fs, xlim = xlims, col = "blue", lwd = 2,
+       main = paste("CDF Comparison, n =", n),
+       xlab = "Sample Mean", ylab = "Cumulative Probability",
+       verticals = FALSE, pch = NA)
+  curve(pnorm(x, mean = mu, sd = sigma), 
+        col = "red", lwd = 2, add = TRUE)
+
+  ks_result <- ks.test(sample_means, "pnorm", mean = mu, sd = sigma)
+  max_differences$max_diff[i] <- ks_result$statistic
+  
+  cat(paste("n =", n, " | Max Difference (K-S):", round(ks_result$statistic, 6), "\n"))
+}
+legend("bottomright", 
+       legend = c("Empirical", "Theoretical"), 
+       col = c("blue", "red"), lwd = 2, cex = 0.8)
+
+par(mfrow = c(1, 1))
+
+```
+###Task 3.1: Justification and Conclusion
+Justification of our solution
+Our solution is based on the Central Limit Theorem (CLT). The CLT states that even if a distribution isn't normal (like our skewed Exponential distribution), the distribution of its sample means will become normal as the sample size n gets bigger.
+
+Our original distribution is Exponential(nu1), where nu1 = 30.
+
+The theoretical mean (mu) of this distribution is 1 / nu1 (or 1/30).
+
+The theoretical variance is 1 / nu1^2 (or 1/900).
+
+The CLT predicts that the distribution of our sample means will be approximately Normal.
+
+The mean of this Normal distribution is mu = 1/30.
+
+The variance is (Original Variance) / n, which is (1/900) / n.
+
+The standard deviation (sigma) is the square root of this, which is 1 / (30 * sqrt(n)).
+
+Our R code uses these exact theoretical parameters (mu <- 1 / nu1 and sigma <- 1 / (nu1 * sqrt(n))) to draw the red theoretical line. We then compare our simulation results directly to this line to see if the theorem holds.
+
+Conclusion
+Our results strongly support the Central Limit Theorem.
+
+From the Histograms: The plots clearly show the convergence. For n=5, the histogram is still visibly skewed to the right. But as n increases to 10 and 50, the shape becomes a much more symmetric, perfect bell curve, matching the red theoretical line.
+
+From the CDF Plots: The "S-curves" show the same thing. The blue empirical line (from our simulation) gets closer and closer to the red theoretical line (from the CLT) as n gets bigger.
+
+From the Statistics: The console output gives numerical proof. The "Max Difference" (the K-S statistic) measures the largest gap between the blue and red curves. This difference decreased as n increased:
+
+For n = 5, the difference was 0.059816
+
+For n = 10, the difference was 0.053546
+
+For n = 50, the difference was 0.024149
+
+Our simulation with K=10,000 repetitions is reliable and clearly demonstrates that the sample means converge to a normal distribution, just as the CLT predicts.
+### Task 3.2
+```{r}
+team_id_number <- 20
+nu1 <- team_id_number + 10
+K <- 10000
+n <- 100
+N_values <- c(2, 3)
+
+par(mfrow = c(1, 2))
+
+
+for (N in N_values) {
+  
+  nu <- N * nu1
+  
+  cat(paste("\n--- Simulating for N =", N, "(nu =", nu, ") ---\n"))
+
+  s_vector <- rowSums(matrix(rexp(K * n, rate = nu), nrow = K))
+  safe_events <- sum(s_vector > 1)
+  prob_safe <- safe_events / K
+  
+  cat(paste("Estimated 'safe' probability:", prob_safe, "\n"))
+  cat(paste("Is", prob_safe, ">= 0.95 ?", prob_safe >= 0.95, "\n"))
+
+  mu_sum <- n / nu
+  sigma_sum <- sqrt(n) / nu
+  
+  hist(s_vector,
+       probability = TRUE,
+       breaks = 100,
+       col = "lightblue",
+       border = "grey",
+       main = paste("Distribution of S_100 for N =", N, "(nu =", nu, ")"),
+       xlab = "Time until 100th click (minutes)")
+
+  curve(dnorm(x, mean = mu_sum, sd = sigma_sum), 
+        col = "red", 
+        lwd = 2, 
+        add = TRUE)
+  abline(v = 1, col = "purple", lwd = 3, lty = 2)
+  
+  legend("topright", 
+         legend = c("Simulated Sums", "CLT Approx.", "Safe Threshold (1 min)"), 
+         col = c("lightblue", "red", "purple"), 
+         lwd = c(NA, 2, 3), 
+         lty = c(NA, 1, 2), 
+         pch = c(22, NA, NA),
+         pt.bg = "lightblue",
+         cex = 0.8)
+}
+
+par(mfrow = c(1, 1))
 ```
 
-**Next, proceed with all the remaining steps**
+###Task 3.2: Justification and Conclusion
+Justification of our solution
+The goal is to find the max integer N (number of samples) so that the probability of being "safe" is at least 0.95.
 
-**Do not forget to include several sentences summarizing your work and the conclusions you have made!**
+Formulation: The "safe" event is "fewer than 100 clicks in 1 minute". As hinted, this is equivalent to the time for 100 clicks, S_100, being greater than 1 minute. So, we need to find N such that P(S_100 > 1) >= 0.95.
+
+Parameters: S_100 is the sum of 100 variables from an Exponential(nu) distribution, where nu = N * nu1 = N * 30.
+
+Justification (CLT): Since n=100 is large, we used the Central Limit Theorem to approximate the distribution of the sum S_100 as a Normal distribution.
+
+The mean of this sum is E[S_100] = n / nu = 100 / (30*N).
+
+The variance of this sum is Var(S_100) = n / nu^2 = 100 / (30*N)^2.
+
+Theoretical Bound: We solved P(S_100 > 1) >= 0.95 for N. This standardizes to finding a Z-score: P(Z > (1 - Mean) / SD) >= 0.95. This simplifies to P(Z > (30*N - 100) / 10) >= 0.95. For this to be true, the Z-score (30*N - 100) / 10 must be less than or equal to -1.645. Solving for N, we got N <= 2.785.
+
+The maximal integer N is therefore 2. Our simulation was designed to test N=2 (which we predicted is safe) and N=3 (which we predicted is unsafe).
+
+Conclusion
+Our theoretical bound of N=2 was confirmed by the simulation.
+
+For N = 2 (nu = 60): The simulation showed an Estimated 'safe' probability of 1.0 (or 100%). This is >= 0.95, so N=2 is safe. The histogram for N=2 shows why: the distribution is centered at 1.67 minutes, and the "unsafe" line at 1.0 minute is far in the left tail (about 4 standard deviations away). It was expected that none of our 10,000 simulations would fail.
+
+For N = 3 (nu = 90): The simulation showed an Estimated 'safe' probability of 0.8378 (or 83.78%). This is < 0.95, so N=3 is unsafe. The histogram for N=3 shows the distribution is centered at 1.11 minutes, much closer to the "unsafe" line at 1.0. A large part of the distribution is on the wrong side of the line, which is why the probability is much lower.
+
+Our simulation with K=10,000 repetitions is reliable and confirms the CLT-based calculation. The maximal number of radioactive samples that can be safely stored is N=2.
 
 ------------------------------------------------------------------------
 
