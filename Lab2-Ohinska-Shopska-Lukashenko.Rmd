@@ -148,11 +148,12 @@ encode_message method codes our 4-byte message into 7-byte message syndrome(r) m
 For large N, the law of large numbers says that $\hat p$ \~ $p^*$, because the fraction of successfull transmissions converges to the expected success probability.
 
 ```{r}
+N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star)) / (0.03 * 0.03)
+cat("Required N for epsilon <= 0.03:", N_new, "\n")
 SE <- sqrt(hat_p * (1 - hat_p) / N_new)
 eps <- 1.96 * SE # 1.96 is z-value for 95% probability
 cat("Half-length of 95% confidence interval: ", eps, "\n")
-N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star)) / (0.03 * 0.03)
-cat("Required N for epsilon <= 0.03:", N_new, "\n")
+
 ```
 
 Here we've got the standard error (shows how our estimation of p_hat can differ from actual p*). Half of the interval shows how large the distance from p\^ to p* can be with probability 95%. For this distance to be less or equal to 0.03, we need N_new simulations. Larger number of simulations gives more precise estimation of p\^ and narrows the distance from theoretical value.
