@@ -4,21 +4,41 @@ author: "Ohinska, Shopska, Lukashenko"
 output:
   html_document:
     df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ## General comments and instructions
 
--   Complete solution will give you **4 points** (working code with explanations + oral defense). Submission deadline **November 1, 2023, 22:00**\
--   The report must be prepared as an *R notebook*; you must submit to **cms** both the source *R notebook* **and** the generated html file\
--   At the beginning of the notebook, provide a work-breakdown structure estimating efforts of each team member\
+-   Complete solution will give you **4 points** (working code with
+    explanations + oral defense). Submission deadline **November 1,
+    2023, 22:00**\
+-   The report must be prepared as an *R notebook*; you must submit to
+    **cms** both the source *R notebook* **and** the generated html
+    file\
+-   At the beginning of the notebook, provide a work-breakdown structure
+    estimating efforts of each team member\
 -   For each task, include
-    -   problem formulation and discussion (what is a reasonable answer to discuss);\
-    -   the corresponding $\mathbf{R}$ code with comments (usually it is just a couple of lines long);\
-    -   the statistics obtained (like sample mean or anything else you use to complete the task) as well as histograms etc to illustrate your findings;\
-    -   justification of your solution (e.g. refer to the corresponding theorems from probability theory);\
-    -   conclusions (e.g. how reliable your answer is, does it agree with common sense expectations etc)\
--   The **team id number** referred to in tasks is the **two-digit** ordinal number of your team on the list. Include the line **set.seed(team id number)** at the beginning of your code to make your calculations reproducible. Also observe that the answers **do** depend on this number!\
--   Take into account that not complying with these instructions may result in point deduction regardless of whether or not your implementation is correct.
+    -   problem formulation and discussion (what is a reasonable answer
+        to discuss);\
+    -   the corresponding $\mathbf{R}$ code with comments (usually it is
+        just a couple of lines long);\
+    -   the statistics obtained (like sample mean or anything else you
+        use to complete the task) as well as histograms etc to
+        illustrate your findings;\
+    -   justification of your solution (e.g. refer to the corresponding
+        theorems from probability theory);\
+    -   conclusions (e.g. how reliable your answer is, does it agree
+        with common sense expectations etc)\
+-   The **team id number** referred to in tasks is the **two-digit**
+    ordinal number of your team on the list. Include the line
+    **set.seed(team id number)** at the beginning of your code to make
+    your calculations reproducible. Also observe that the answers **do**
+    depend on this number!\
+-   Take into account that not complying with these instructions may
+    result in point deduction regardless of whether or not your
+    implementation is correct.
 
 ------------------------------------------------------------------------
 
@@ -26,11 +46,23 @@ output:
 
 #### In this task, we discuss the $[7,4]$ Hamming code and investigate its reliability. That coding system can correct single errors in the transmission of $4$-bit messages and proceeds as follows:
 
--   given a message $\mathbf{m} = (a_1 a_2 a_3 a_4)$, we first encode it to a $7$-bit *codeword* $\mathbf{c} = \mathbf{m}G = (x_1 x_2 x_3 x_4 x_5 x_6 x_7)$, where $G$ is a $4\times 7$ *generator* matrix\
--   the codeword $\mathbf{c}$ is transmitted, and $\mathbf{r}$ is the received message\
--   $\mathbf{r}$ is checked for errors by calculating the *syndrome vector* $\mathbf{z} := \mathbf{r} H$, for a $7 \times 3$ *parity-check* matrix $H$\
--   if a single error has occurred in $\mathbf{r}$, then the binary $\mathbf{z} = (z_1 z_2 z_3)$ identifies the wrong bit no. $z_1 + 2 z_2 + 4z_3$; thus $(0 0 0)$ shows there was no error (or more than one), while $(1 1 0 )$ means the third bit (or more than one) got corrupted\
--   if the error was identified, then we flip the corresponding bit in $\mathbf{r}$ to get the corrected $\mathbf{r}^* = (r_1 r_2 r_3 r_4 r_5 r_6 r_7)$;\
+-   given a message $\mathbf{m} = (a_1 a_2 a_3 a_4)$, we first encode it
+    to a $7$-bit *codeword*
+    $\mathbf{c} = \mathbf{m}G = (x_1 x_2 x_3 x_4 x_5 x_6 x_7)$, where
+    $G$ is a $4\times 7$ *generator* matrix\
+-   the codeword $\mathbf{c}$ is transmitted, and $\mathbf{r}$ is the
+    received message\
+-   $\mathbf{r}$ is checked for errors by calculating the *syndrome
+    vector* $\mathbf{z} := \mathbf{r} H$, for a $7 \times 3$
+    *parity-check* matrix $H$\
+-   if a single error has occurred in $\mathbf{r}$, then the binary
+    $\mathbf{z} = (z_1 z_2 z_3)$ identifies the wrong bit no.
+    $z_1 + 2 z_2 + 4z_3$; thus $(0 0 0)$ shows there was no error (or
+    more than one), while $(1 1 0 )$ means the third bit (or more than
+    one) got corrupted\
+-   if the error was identified, then we flip the corresponding bit in
+    $\mathbf{r}$ to get the corrected
+    $\mathbf{r}^* = (r_1 r_2 r_3 r_4 r_5 r_6 r_7)$;\
 -   the decoded message is then $\mathbf{m}^*:= (r_3r_5r_6r_7)$.
 
 #### The **generator** matrix $G$ and the **parity-check** matrix $H$ are given by
@@ -53,10 +85,19 @@ $$
 
 #### Assume that each bit in the transmission $\mathbf{c} \mapsto \mathbf{r}$ gets corrupted independently of the others with probability $p = \mathtt{id}/100$, where $\mathtt{id}$ is your team number. Your task is the following one.
 
-1.  Simulate the encoding-transmission-decoding process $N$ times and find the estimate $\hat p$ of the probability $p^*$ of correct transmission of a single message $\mathbf{m}$. Comment why, for large $N$, $\hat p$ is expected to be close to $p^*$.\
-2.  By estimating the standard deviation of the corresponding indicator of success by the standard error of your sample and using the CLT, predict the \emph{confidence} interval $(p^*-\varepsilon, p^* + \varepsilon)$, in which the estimate $\hat p$ falls with probability at least $0.95$.\
+1.  Simulate the encoding-transmission-decoding process $N$ times and
+    find the estimate $\hat p$ of the probability $p^*$ of correct
+    transmission of a single message $\mathbf{m}$. Comment why, for
+    large $N$, $\hat p$ is expected to be close to $p^*$.\
+2.  By estimating the standard deviation of the corresponding indicator
+    of success by the standard error of your sample and using the CLT,
+    predict the \emph{confidence} interval
+    $(p^*-\varepsilon, p^* + \varepsilon)$, in which the estimate
+    $\hat p$ falls with probability at least $0.95$.\
 3.  What choice of $N$ guarantees that $\varepsilon \le 0.03$?\
-4.  Draw the histogram of the number $k = 0,1,2,3,4$ of errors while transmitting a $4$-digit binary message. Do you think it is one of the known distributions?
+4.  Draw the histogram of the number $k = 0,1,2,3,4$ of errors while
+    transmitting a $4$-digit binary message. Do you think it is one of
+    the known distributions?
 
 #### You can (but do not have to) use the chunks we prepared for you
 
@@ -128,7 +169,9 @@ errors <- matrix(rbinom(N * 7, 1, p), nrow = N)
 received <- (codewords + errors) %% 2 # matrix of incorreclty recieved messages
 ```
 
-The next steps include detecting the errors in the received messages, correcting them, and then decoding the obtained messages. After this, you can continue with calculating all the quantities of interest
+The next steps include detecting the errors in the received messages,
+correcting them, and then decoding the obtained messages. After this,
+you can continue with calculating all the quantities of interest
 
 ```{r}
 corrected <- t(apply(received, 1, correction))
@@ -143,9 +186,21 @@ cat("Theoretical p* =", p_star, "\n")
 
 ```
 
-encode_message method codes our 4-byte message into 7-byte message syndrome(r) method calculates the syndrome vector for checking errors correction(r) finds and corrects olne-byte errors in coded word decode(r) returns 4-byte message from corrected version of the word After this we have a natrix of random messages and then them coded. Then we generate message with errors with equal probability = p for all to have errors. Later every received word goes through the function of correction where one-byte mistakes get corrected and later decoded into 4-byte. Finally we calculate number of successes in transmitting words with no mistakes hat_p - empirical probability of success, p_star - theoretical probability of success.
+encode_message method codes our 4-byte message into 7-byte message
+syndrome(r) method calculates the syndrome vector for checking errors
+correction(r) finds and corrects olne-byte errors in coded word
+decode(r) returns 4-byte message from corrected version of the word
+After this we have a natrix of random messages and then them coded. Then
+we generate message with errors with equal probability = p for all to
+have errors. Later every received word goes through the function of
+correction where one-byte mistakes get corrected and later decoded into
+4-byte. Finally we calculate number of successes in transmitting words
+with no mistakes hat_p - empirical probability of success, p_star -
+theoretical probability of success.
 
-For large N, the law of large numbers says that $\hat p$ \~ $p^*$, because the fraction of successfull transmissions converges to the expected success probability.
+For large N, the law of large numbers says that $\hat p$ \~ $p^*$,
+because the fraction of successfull transmissions converges to the
+expected success probability.
 
 ```{r}
 N_new <- ceiling(1.96 * 1.96 * p_star * (1 - p_star)) / (0.03 * 0.03)
@@ -156,7 +211,12 @@ cat("Half-length of 95% confidence interval: ", eps, "\n")
 
 ```
 
-Here we've got the standard error (shows how our estimation of p_hat can differ from actual p*). Half of the interval shows how large the distance from p\^ to p* can be with probability 95%. For this distance to be less or equal to 0.03, we need N_new simulations. Larger number of simulations gives more precise estimation of p\^ and narrows the distance from theoretical value.
+Here we've got the standard error (shows how our estimation of p_hat can
+differ from actual p*). Half of the interval shows how large the
+distance from p\^ to p* can be with probability 95%. For this distance
+to be less or equal to 0.03, we need N_new simulations. Larger number of
+simulations gives more precise estimation of p\^ and narrows the
+distance from theoretical value.
 
 ```{r}
 num_errors <- rbinom(N, size = 4, prob = p)
@@ -166,32 +226,80 @@ hist(num_errors, breaks = -0.5:4.5, col = "skyblue",
      xlab = "Number of errors k", ylab = "Frequency")
 ```
 
-The random variable that counts the number of wrong bits in a decoded message has Binomial distribution, because it has a fixed number of independent trials, every outcome is either success or loss, probability of success is always the same. In our case, as we are 20th team, p = 0.2, so most part of the result will be distributed to the left, as 0.2 is not that high probability for the error.
+The random variable that counts the number of wrong bits in a decoded
+message has Binomial distribution, because it has a fixed number of
+independent trials, every outcome is either success or loss, probability
+of success is always the same. In our case, as we are 20th team, p =
+0.2, so most part of the result will be distributed to the left, as 0.2
+is not that high probability for the error.
 
-**Do not forget to include several sentences summarizing your work and the conclusions you have made!**
+**Do not forget to include several sentences summarizing your work and
+the conclusions you have made!**
 
 ------------------------------------------------------------------------
 
 ### Task 2.
 
-In this task, we discuss a real-life process that is well modelled by a Poisson distribution. As you remember, a Poisson random variable describes occurrences of rare events, i.e., counts the number of successes in a large number of independent random experiments. One of the typical examples is the **radioactive decay** process.
+In this task, we discuss a real-life process that is well modelled by a
+Poisson distribution. As you remember, a Poisson random variable
+describes occurrences of rare events, i.e., counts the number of
+successes in a large number of independent random experiments. One of
+the typical examples is the **radioactive decay** process.
 
-Consider a sample of radioactive element of mass $m$, which has a big *half-life period* $T$; it is vitally important to know the probability that during a one second period, the number of nuclei decays will not exceed some critical level $k$. This probability can easily be estimated using the fact that, given the *activity* ${\lambda}$ of the element (i.e., the probability that exactly one nucleus decays in one second) and the number $N$ of atoms in the sample, the random number of decays within a second is well modelled by Poisson distribution with parameter $\mu:=N\lambda$. Next, for the sample of mass $m$, the number of atoms is $N = \frac{m}{M} N_A$, where $N_A = 6 \times 10^{23}$ is the Avogadro constant, and $M$ is the molar (atomic) mass of the element. The activity of the element, $\lambda$, is $\log(2)/T$, where $T$ is measured in seconds.
+Consider a sample of radioactive element of mass $m$, which has a big
+*half-life period* $T$; it is vitally important to know the probability
+that during a one second period, the number of nuclei decays will not
+exceed some critical level $k$. This probability can easily be estimated
+using the fact that, given the *activity* ${\lambda}$ of the element
+(i.e., the probability that exactly one nucleus decays in one second)
+and the number $N$ of atoms in the sample, the random number of decays
+within a second is well modelled by Poisson distribution with parameter
+$\mu:=N\lambda$. Next, for the sample of mass $m$, the number of atoms
+is $N = \frac{m}{M} N_A$, where $N_A = 6 \times 10^{23}$ is the Avogadro
+constant, and $M$ is the molar (atomic) mass of the element. The
+activity of the element, $\lambda$, is $\log(2)/T$, where $T$ is
+measured in seconds.
 
-Assume that a medical laboratory receives $n$ samples of radioactive element ${{}^{137}}\mathtt{Cs}$ (used in radiotherapy) with half-life period $T = 30.1$ years and mass $m = \mathtt{team\, id \,number} \times 10^{-6}$ g each. Denote by $X_1,X_2,\dots,X_n$ the **i.i.d. r.v.**'s counting the number of decays in sample $i$ in one second.
+Assume that a medical laboratory receives $n$ samples of radioactive
+element ${{}^{137}}\mathtt{Cs}$ (used in radiotherapy) with half-life
+period $T = 30.1$ years and mass
+$m = \mathtt{team\, id \,number} \times 10^{-6}$ g each. Denote by
+$X_1,X_2,\dots,X_n$ the **i.i.d. r.v.**'s counting the number of decays
+in sample $i$ in one second.
 
-1.  Specify the parameter of the Poisson distribution of $X_i$ (you'll need the atomic mass of *Cesium-137*)\
-2.  Show that the distribution of the sample means of $X_1,\dots,X_n$ gets very close to a normal one as $n$ becomes large and identify that normal distribution. To this end,
-    -   simulate the realization $x_1,x_2,\dots,x_n$ of the $X_i$ and calculate the sample mean $s=\overline{\mathbf{x}}$;
-    -   repeat this $K$ times to get the sample $\mathbf{s}=(s_1,\dots,s_K)$ of means and form the empirical cumulative distribution function $\hat F_{\mathbf{s}}$ of $\mathbf{s}$;
-    -   identify $\mu$ and $\sigma^2$ such that the \textbf{c.d.f.} $F$ of $\mathscr{N}(\mu,\sigma^2)$ is close to the \textbf{e.c.d.f.} $\hat F_{\mathbf{s}}$ and plot both **c.d.f.**'s on one graph to visualize their proximity (use the proper scales!);
-    -   calculate the maximal difference between the two \textbf{c.d.f.}'s;
-    -   consider cases $n = 5$, $n = 10$, $n=50$ and comment on the results.\
-3.  Calculate the largest possible value of $n$, for which the total number of decays in one second is less than $8 \times 10^8$ with probability at least $0.95$. To this end,
-    -   obtain the theoretical bound on $n$ using Markov inequality, Chernoff bound and Central Limit Theorem, and compare the results;\
-    -   simulate the realization $x_1,x_2,\dots,x_n$ of the $X_i$ and calculate the sum $s=x_1 + \cdots +x_n$;
-    -   repeat this $K$ times to get the sample $\mathbf{s}=(s_1,\dots,s_K)$ of sums;
-    -   calculate the number of elements of the sample which are less than critical value ($8 \times 10^8$) and calculate the empirical probability; comment whether it is close to the desired level $0.95$
+1.  Specify the parameter of the Poisson distribution of $X_i$ (you'll
+    need the atomic mass of *Cesium-137*)\
+2.  Show that the distribution of the sample means of $X_1,\dots,X_n$
+    gets very close to a normal one as $n$ becomes large and identify
+    that normal distribution. To this end,
+    -   simulate the realization $x_1,x_2,\dots,x_n$ of the $X_i$ and
+        calculate the sample mean $s=\overline{\mathbf{x}}$;
+    -   repeat this $K$ times to get the sample
+        $\mathbf{s}=(s_1,\dots,s_K)$ of means and form the empirical
+        cumulative distribution function $\hat F_{\mathbf{s}}$ of
+        $\mathbf{s}$;
+    -   identify $\mu$ and $\sigma^2$ such that the \textbf{c.d.f.} $F$
+        of $\mathscr{N}(\mu,\sigma^2)$ is close to the \textbf{e.c.d.f.}
+        $\hat F_{\mathbf{s}}$ and plot both **c.d.f.**'s on one graph to
+        visualize their proximity (use the proper scales!);
+    -   calculate the maximal difference between the two
+        \textbf{c.d.f.}'s;
+    -   consider cases $n = 5$, $n = 10$, $n=50$ and comment on the
+        results.\
+3.  Calculate the largest possible value of $n$, for which the total
+    number of decays in one second is less than $8 \times 10^8$ with
+    probability at least $0.95$. To this end,
+    -   obtain the theoretical bound on $n$ using Markov inequality,
+        Chernoff bound and Central Limit Theorem, and compare the
+        results;\
+    -   simulate the realization $x_1,x_2,\dots,x_n$ of the $X_i$ and
+        calculate the sum $s=x_1 + \cdots +x_n$;
+    -   repeat this $K$ times to get the sample
+        $\mathbf{s}=(s_1,\dots,s_K)$ of sums;
+    -   calculate the number of elements of the sample which are less
+        than critical value ($8 \times 10^8$) and calculate the
+        empirical probability; comment whether it is close to the
+        desired level $0.95$
 
 #### 1. Specify the parameter of the Poisson distribution of $X_i$
 
@@ -336,18 +444,45 @@ cat("Chernoff-Gaussian Bound: n <=", n_chernoff, "\n")
 
 #### One of the devices to measure radioactivity level at a given location is the Geiger counter. When the radioactive level is almost constant, the time between two consecutive clicks of the Geiger counter is an exponentially distributed random variable with parameter $\nu_1 = \mathtt{team\,id\,number} + 10$. Denote by $X_k$ the random time between the $(k-1)^{\mathrm{st}}$ and $k^{\mathrm{th}}$ click of the counter.
 
-1.  Show that the distribution of the sample means of $X_1, X_2,\dots,X_n$ gets very close to a normal one (which one?) as $n$ becomes large. To this end,
-    -   simulate the realizations $x_1,x_2,\dots,x_n$ of the \textbf{r.v.} $X_i$ and calculate the sample mean $s=\overline{\mathbf{x}}$;\
-    -   repeat this $K$ times to get the sample $\mathbf{s}=(s_1,\dots,s_K)$ of means and then the \emph{empirical cumulative distribution} function $F_{\mathbf{s}}$ of $\mathbf{s}$;\
-    -   identify $\mu$ and $\sigma^2$ such that the \textbf{c.d.f.} of $\mathscr{N}(\mu,\sigma^2)$ is close to the \textbf{e.c.d.f.} $F_{\mathbf{s}}$ of and plot both \textbf{c.d.f.}'s on one graph to visualize their proximity;\
-    -   calculate the maximal difference between the two \textbf{c.d.f.}'s;\
-    -   consider cases $n = 5$, $n = 10$, $n=50$ and comment on the results.
-2.  The place can be considered safe when the number of clicks in one minute does not exceed $100$. It is known that the parameter $\nu$ of the resulting exponential distribution is proportional to the number $N$ of the radioactive samples, i.e., $\nu = \nu_1*N$, where $\nu_1$ is the parameter for one sample. Determine the maximal number of radioactive samples that can be stored in that place so that, with probability $0.95$, the place is identified as safe. To do this,
-    -   express the event of interest in terms of the \textbf{r.v.} $S:= X_1 + \cdots + X_{100}$;\
-    -   obtain the theoretical bounds on $N$ using the Markov inequality, Chernoff bound and Central Limit Theorem and compare the results;\
-    -   with the predicted $N$ and thus $\nu$, simulate the realization $x_1,x_2,\dots,x_{100}$ of the $X_i$ and of the sum $S = X_1 + \cdots + X_{100}$;\
-    -   repeat this $K$ times to get the sample $\mathbf{s}=(s_1,\dots,s_K)$ of total times until the $100^{\mathrm{th}}$ click;\
-    -   estimate the probability that the location is identified as safe and compare to the desired level $0.95$
+1.  Show that the distribution of the sample means of
+    $X_1, X_2,\dots,X_n$ gets very close to a normal one (which one?) as
+    $n$ becomes large. To this end,
+    -   simulate the realizations $x_1,x_2,\dots,x_n$ of the
+        \textbf{r.v.} $X_i$ and calculate the sample mean
+        $s=\overline{\mathbf{x}}$;\
+    -   repeat this $K$ times to get the sample
+        $\mathbf{s}=(s_1,\dots,s_K)$ of means and then the
+        \emph{empirical cumulative distribution} function
+        $F_{\mathbf{s}}$ of $\mathbf{s}$;\
+    -   identify $\mu$ and $\sigma^2$ such that the \textbf{c.d.f.} of
+        $\mathscr{N}(\mu,\sigma^2)$ is close to the \textbf{e.c.d.f.}
+        $F_{\mathbf{s}}$ of and plot both \textbf{c.d.f.}'s on one graph
+        to visualize their proximity;\
+    -   calculate the maximal difference between the two
+        \textbf{c.d.f.}'s;\
+    -   consider cases $n = 5$, $n = 10$, $n=50$ and comment on the
+        results.
+2.  The place can be considered safe when the number of clicks in one
+    minute does not exceed $100$. It is known that the parameter $\nu$
+    of the resulting exponential distribution is proportional to the
+    number $N$ of the radioactive samples, i.e., $\nu = \nu_1*N$, where
+    $\nu_1$ is the parameter for one sample. Determine the maximal
+    number of radioactive samples that can be stored in that place so
+    that, with probability $0.95$, the place is identified as safe. To
+    do this,
+    -   express the event of interest in terms of the \textbf{r.v.}
+        $S:= X_1 + \cdots + X_{100}$;\
+    -   obtain the theoretical bounds on $N$ using the Markov
+        inequality, Chernoff bound and Central Limit Theorem and compare
+        the results;\
+    -   with the predicted $N$ and thus $\nu$, simulate the realization
+        $x_1,x_2,\dots,x_{100}$ of the $X_i$ and of the sum
+        $S = X_1 + \cdots + X_{100}$;\
+    -   repeat this $K$ times to get the sample
+        $\mathbf{s}=(s_1,\dots,s_K)$ of total times until the
+        $100^{\mathrm{th}}$ click;\
+    -   estimate the probability that the location is identified as safe
+        and compare to the desired level $0.95$
 
 #### First, generate samples an sample means:
 
@@ -418,34 +553,48 @@ legend("bottomright",
 par(mfrow = c(1, 1))
 
 ```
-###Task 3.1: Justification and Conclusion
-Justification of our solution
-Our solution is based on the Central Limit Theorem (CLT). The CLT states that even if a distribution isn't normal (like our skewed Exponential distribution), the distribution of its sample means will become normal as the sample size n gets bigger.
+
+###Task 3.1: Justification and Conclusion Justification of our solution
+Our solution is based on the Central Limit Theorem (CLT). The CLT states
+that even if a distribution isn't normal (like our skewed Exponential
+distribution), the distribution of its sample means will become normal
+as the sample size n gets bigger.
 
 Our original distribution is Exponential(nu1), where nu1 = 30.
 
 The theoretical mean (mu) of this distribution is 1 / nu1 (or 1/30).
 
-The theoretical variance is 1 / nu1^2 (or 1/900).
+The theoretical variance is 1 / nu1\^2 (or 1/900).
 
-The CLT predicts that the distribution of our sample means will be approximately Normal.
+The CLT predicts that the distribution of our sample means will be
+approximately Normal.
 
 The mean of this Normal distribution is mu = 1/30.
 
 The variance is (Original Variance) / n, which is (1/900) / n.
 
-The standard deviation (sigma) is the square root of this, which is 1 / (30 * sqrt(n)).
+The standard deviation (sigma) is the square root of this, which is 1 /
+(30 \* sqrt(n)).
 
-Our R code uses these exact theoretical parameters (mu <- 1 / nu1 and sigma <- 1 / (nu1 * sqrt(n))) to draw the red theoretical line. We then compare our simulation results directly to this line to see if the theorem holds.
+Our R code uses these exact theoretical parameters (mu \<- 1 / nu1 and
+sigma \<- 1 / (nu1 \* sqrt(n))) to draw the red theoretical line. We
+then compare our simulation results directly to this line to see if the
+theorem holds.
 
-Conclusion
-Our results strongly support the Central Limit Theorem.
+Conclusion Our results strongly support the Central Limit Theorem.
 
-From the Histograms: The plots clearly show the convergence. For n=5, the histogram is still visibly skewed to the right. But as n increases to 10 and 50, the shape becomes a much more symmetric, perfect bell curve, matching the red theoretical line.
+From the Histograms: The plots clearly show the convergence. For n=5,
+the histogram is still visibly skewed to the right. But as n increases
+to 10 and 50, the shape becomes a much more symmetric, perfect bell
+curve, matching the red theoretical line.
 
-From the CDF Plots: The "S-curves" show the same thing. The blue empirical line (from our simulation) gets closer and closer to the red theoretical line (from the CLT) as n gets bigger.
+From the CDF Plots: The "S-curves" show the same thing. The blue
+empirical line (from our simulation) gets closer and closer to the red
+theoretical line (from the CLT) as n gets bigger.
 
-From the Statistics: The console output gives numerical proof. The "Max Difference" (the K-S statistic) measures the largest gap between the blue and red curves. This difference decreased as n increased:
+From the Statistics: The console output gives numerical proof. The "Max
+Difference" (the K-S statistic) measures the largest gap between the
+blue and red curves. This difference decreased as n increased:
 
 For n = 5, the difference was 0.059816
 
@@ -453,14 +602,75 @@ For n = 10, the difference was 0.053546
 
 For n = 50, the difference was 0.024149
 
-Our simulation with K=10,000 repetitions is reliable and clearly demonstrates that the sample means converge to a normal distribution, just as the CLT predicts.
-### Task 3.2
+Our simulation with K=10,000 repetitions is reliable and clearly
+demonstrates that the sample means converge to a normal distribution,
+just as the CLT predicts. \### Task 3.2
+
 ```{r}
 team_id_number <- 20
 nu1 <- team_id_number + 10
-K <- 10000
-n <- 100
-N_values <- c(2, 3)
+K <- 10000                 
+n <- 100                  
+
+# --- (a) Problem Formulation ---
+# Event of Interest: Find max integer N so that P(S_100 > 1) >= 0.95
+# S_100 is the sum of 100 i.i.d. Exponential(nu) variables
+# nu = nu1 * N = 30 * N
+# E[S_100] = n / nu = 100 / nu
+# Var[S_100] = n / nu^2 = 100 / nu^2
+
+cat("=====================================================\n")
+cat(" (b) Theoretical Bound Calculations\n")
+cat("=====================================================\n\n")
+
+# --- 1. Central Limit Theorem (CLT) Bound ---
+cat("--- 1. Central Limit Theorem (CLT) Bound ---\n")
+# We need P(Z > (nu - 100)/10) >= 0.95
+# This means (nu - 100)/10 <= z(0.05)
+z_score_05 <- qnorm(0.05) # This is -1.644854
+nu_clt <- 10 * z_score_05 + 100 # 83.55146
+N_clt <- nu_clt / nu1 # 2.785049
+cat(paste("Maximal nu (CLT):", nu_clt, "\n"))
+cat(paste("N <=", N_clt, "-> Max integer N =", floor(N_clt), "\n\n"))
+
+
+# --- 2. Markov Inequality Bound ---
+cat("--- 2. Markov Inequality Bound ---\n")
+# We need 0.95 <= 100 / nu
+nu_markov <- 100 / 0.95 # 105.2632
+N_markov <- nu_markov / nu1 # 3.508772
+cat(paste("Maximal nu (Markov):", nu_markov, "\n"))
+cat(paste("N <=", N_markov, "-> Max integer N =", floor(N_markov), "\n\n"))
+
+
+# --- 3. Chernoff Bound ---
+cat("--- 3. Chernoff Bound ---\n")
+# We need to solve: 100*log(nu/100) - nu <= -102.9957
+# Let's test the value found in the analysis, nu = 77.4
+nu_test <- 77.4
+chernoff_value <- 100 * log(nu_test / 100) - nu_test # -103.0135
+is_bound_met <- chernoff_value <= -102.9957 # TRUE
+N_chernoff <- nu_test / nu1 # 2.58
+cat(paste("Testing nu =", nu_test, "\n"))
+cat(paste("Result:", chernoff_value, "(which is <= -102.9957:", is_bound_met, ")\n"))
+cat(paste("N <=", N_chernoff, "-> Max integer N =", floor(N_chernoff), "\n\n"))
+
+
+# --- 4. Comparison of Results ---
+cat("--- Comparison of Results ---\n")
+cat(paste("CLT: N =", floor(N_clt), "\n"))
+cat(paste("Chernoff: N =", floor(N_chernoff), "\n"))
+cat(paste("Markov: N =", floor(N_markov), "\n"))
+cat("CLT and Chernoff are tighter and agree.\n")
+cat("Predicted Maximal N = 2\n\n")
+
+
+cat("=====================================================\n")
+cat(" (c, d, e) Simulation to Verify Bounds\n")
+cat("=====================================================\n")
+
+# --- Simulation (Parts c, d, e) ---
+N_values <- c(2, 3) 
 
 par(mfrow = c(1, 2))
 
@@ -471,7 +681,10 @@ for (N in N_values) {
   
   cat(paste("\n--- Simulating for N =", N, "(nu =", nu, ") ---\n"))
 
+  # (c), (d) 
   s_vector <- rowSums(matrix(rexp(K * n, rate = nu), nrow = K))
+  
+  # (e) 
   safe_events <- sum(s_vector > 1)
   prob_safe <- safe_events / K
   
@@ -493,6 +706,7 @@ for (N in N_values) {
         col = "red", 
         lwd = 2, 
         add = TRUE)
+  
   abline(v = 1, col = "purple", lwd = 3, lty = 2)
   
   legend("topright", 
@@ -506,34 +720,58 @@ for (N in N_values) {
 }
 
 par(mfrow = c(1, 1))
+
 ```
 
-###Task 3.2: Justification and Conclusion
-Justification of our solution
-The goal is to find the max integer N (number of samples) so that the probability of being "safe" is at least 0.95.
+###Task 3.2: Justification and Conclusion Justification of our solution
+The goal is to find the max integer N (number of samples) so that the
+probability of being "safe" is at least 0.95.
 
-Formulation: The "safe" event is "fewer than 100 clicks in 1 minute". As hinted, this is equivalent to the time for 100 clicks, S_100, being greater than 1 minute. So, we need to find N such that P(S_100 > 1) >= 0.95.
+Formulation: The "safe" event is "fewer than 100 clicks in 1 minute". As
+hinted, this is equivalent to the time for 100 clicks, S_100, being
+greater than 1 minute. So, we need to find N such that P(S_100 \> 1) \>=
+0.95.
 
-Parameters: S_100 is the sum of 100 variables from an Exponential(nu) distribution, where nu = N * nu1 = N * 30.
+Parameters: S_100 is the sum of 100 variables from an Exponential(nu)
+distribution, where nu = N \* nu1 = N \* 30.
 
-Justification (CLT): Since n=100 is large, we used the Central Limit Theorem to approximate the distribution of the sum S_100 as a Normal distribution.
+Justification (CLT): Since n=100 is large, we used the Central Limit
+Theorem to approximate the distribution of the sum S_100 as a Normal
+distribution.
 
-The mean of this sum is E[S_100] = n / nu = 100 / (30*N).
+The mean of this sum is E[S_100] = n / nu = 100 / (30\*N).
 
-The variance of this sum is Var(S_100) = n / nu^2 = 100 / (30*N)^2.
+The variance of this sum is Var(S_100) = n / nu\^2 = 100 / (30\*N)\^2.
 
-Theoretical Bound: We solved P(S_100 > 1) >= 0.95 for N. This standardizes to finding a Z-score: P(Z > (1 - Mean) / SD) >= 0.95. This simplifies to P(Z > (30*N - 100) / 10) >= 0.95. For this to be true, the Z-score (30*N - 100) / 10 must be less than or equal to -1.645. Solving for N, we got N <= 2.785.
+Theoretical Bound: We solved P(S_100 \> 1) \>= 0.95 for N. This
+standardizes to finding a Z-score: P(Z \> (1 - Mean) / SD) \>= 0.95.
+This simplifies to P(Z \> (30*N - 100) / 10) \>= 0.95. For this to be
+true, the Z-score (30*N - 100) / 10 must be less than or equal to
+-1.645. Solving for N, we got N \<= 2.785.
 
-The maximal integer N is therefore 2. Our simulation was designed to test N=2 (which we predicted is safe) and N=3 (which we predicted is unsafe).
+The maximal integer N is therefore 2. Our simulation was designed to
+test N=2 (which we predicted is safe) and N=3 (which we predicted is
+unsafe).
 
-Conclusion
-Our theoretical bound of N=2 was confirmed by the simulation.
+Conclusion Our theoretical bound of N=2 was confirmed by the simulation.
 
-For N = 2 (nu = 60): The simulation showed an Estimated 'safe' probability of 1.0 (or 100%). This is >= 0.95, so N=2 is safe. The histogram for N=2 shows why: the distribution is centered at 1.67 minutes, and the "unsafe" line at 1.0 minute is far in the left tail (about 4 standard deviations away). It was expected that none of our 10,000 simulations would fail.
+For N = 2 (nu = 60): The simulation showed an Estimated 'safe'
+probability of 1.0 (or 100%). This is \>= 0.95, so N=2 is safe. The
+histogram for N=2 shows why: the distribution is centered at 1.67
+minutes, and the "unsafe" line at 1.0 minute is far in the left tail
+(about 4 standard deviations away). It was expected that none of our
+10,000 simulations would fail.
 
-For N = 3 (nu = 90): The simulation showed an Estimated 'safe' probability of 0.8378 (or 83.78%). This is < 0.95, so N=3 is unsafe. The histogram for N=3 shows the distribution is centered at 1.11 minutes, much closer to the "unsafe" line at 1.0. A large part of the distribution is on the wrong side of the line, which is why the probability is much lower.
+For N = 3 (nu = 90): The simulation showed an Estimated 'safe'
+probability of 0.8378 (or 83.78%). This is \< 0.95, so N=3 is unsafe.
+The histogram for N=3 shows the distribution is centered at 1.11
+minutes, much closer to the "unsafe" line at 1.0. A large part of the
+distribution is on the wrong side of the line, which is why the
+probability is much lower.
 
-Our simulation with K=10,000 repetitions is reliable and confirms the CLT-based calculation. The maximal number of radioactive samples that can be safely stored is N=2.
+Our simulation with K=10,000 repetitions is reliable and confirms the
+CLT-based calculation. The maximal number of radioactive samples that
+can be safely stored is N=2.
 
 ------------------------------------------------------------------------
 
@@ -541,11 +779,18 @@ Our simulation with K=10,000 repetitions is reliable and confirms the CLT-based 
 
 **This task consists of two parts:**
 
-1.  **In this part, we discuss independence of random variables and its moments: expectation and variance.**
+1.  **In this part, we discuss independence of random variables and its
+    moments: expectation and variance.**
 
-    1.  Suppose we have a random variable $X$. Explain why $\mathbb{E}(\frac{1}{X}) \neq \frac{1}{\mathbb{E(X)}}$;
+    1.  Suppose we have a random variable $X$. Explain why
+        $\mathbb{E}(\frac{1}{X}) \neq \frac{1}{\mathbb{E(X)}}$;
 
-    2.  Let $X \sim \mathscr{N}(\mu,\sigma^2)$ with $\mu = teamidnumber$ and $\sigma^{2} = 2\times teamidnumber+7$. Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ and $y_1,y_2,\dots,y_{100}$ of $Y := \frac{1}{X}$ to calculate the values of $\frac{1}{\overline{\textbf{X}}}$ and $\overline{\textbf{Y}}$. Comment on the received results;
+    2.  Let $X \sim \mathscr{N}(\mu,\sigma^2)$ with $\mu = teamidnumber$
+        and $\sigma^{2} = 2\times teamidnumber+7$. Simulate realizations
+        $x_1,x_2,\dots,x_{100}$ of $X$ and $y_1,y_2,\dots,y_{100}$ of
+        $Y := \frac{1}{X}$ to calculate the values of
+        $\frac{1}{\overline{\textbf{X}}}$ and $\overline{\textbf{Y}}$.
+        Comment on the received results;
 
 ```{r}
 mu <- 20
@@ -567,7 +812,12 @@ cat("Difference (Ȳ - 1/X̄):", Y_bar - one_over_X_bar, "\n")
 
 ```
 
-X_bar is very close to the true mean, no matter how many times we run the code. It tells us about correctness of the simulation. Ȳ and 1/X are different because of non-linearity of the transformation Jensen's Inequality states that for a random variable X and a convex function f(x) (in our case 1/X), the following holds: $\mathbb{E}(\frac{1}{X}) > \frac{1}{\mathbb{E(X)}}$;
+X_bar is very close to the true mean, no matter how many times we run
+the code. It tells us about correctness of the simulation. Ȳ and 1/X are
+different because of non-linearity of the transformation Jensen's
+Inequality states that for a random variable X and a convex function
+f(x) (in our case 1/X), the following holds:
+$\mathbb{E}(\frac{1}{X}) > \frac{1}{\mathbb{E(X)}}$;
 
 ```         
 3.  Let $X$ and $Y$ be exponentially distributed r.v.'s with parameter $\lambda = 2$. Set $Z := \log{X} + 5$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Y$. Plot the Quantile-Quantile plot and scatterplot of $X$ and $Z$. Explain the results. Comment on the difference of relations between the pairs of random variables. Which pair of r.v.'s is dependent and which one is similar?
@@ -586,7 +836,16 @@ plot(X, Y, main="Scatterplot of X and Y", xlab = "X", ylab = "Y")
 
 ```
 
-Scatterplot of X and Y is chaotic and dispersed because each point x_i, y_i represents a point generated independently of one another. Since variables X and Y do not provide any information about one another, there is no relation between them. This results in a chaotic and dispersed scatterplot. In contrast, Q-Q plot does not examine the relation between individual observations, but rather compares whole distributions. Before constructing a qq plot, both samples are sorted and corresponding quantiles are plotted. As X and Y follow the same theoretical distribution, their quantiles coincide and increase proportionally, so points align approximately along a straight line.
+Scatterplot of X and Y is chaotic and dispersed because each point x_i,
+y_i represents a point generated independently of one another. Since
+variables X and Y do not provide any information about one another,
+there is no relation between them. This results in a chaotic and
+dispersed scatterplot. In contrast, Q-Q plot does not examine the
+relation between individual observations, but rather compares whole
+distributions. Before constructing a qq plot, both samples are sorted
+and corresponding quantiles are plotted. As X and Y follow the same
+theoretical distribution, their quantiles coincide and increase
+proportionally, so points align approximately along a straight line.
 
 ```{r}
 set.seed(20)
@@ -600,29 +859,49 @@ qqplot(X, Z, main = "Quantile-quantile plot of X and Z", xlab = "Quantiles of X"
 plot(X, Z, main="Scatterplot of X and Z", xlab = "X", ylab = "Z")
 ```
 
-Scatterplot of X and Y forms a smooth, increasing curve because Z is a deterministic transformation of X. This smooth structure indicates a strong relation between two variables. In contrast, Q-Q plot deviates from straight line because the logarihtmic transformation of changes the shape of the distribution, while X is exponentially distributed, Z becomes approximately symmetric and shifted. So q-q plot reveals that X and Z have different distributions.
+Scatterplot of X and Y forms a smooth, increasing curve because Z is a
+deterministic transformation of X. This smooth structure indicates a
+strong relation between two variables. In contrast, Q-Q plot deviates
+from straight line because the logarihtmic transformation of changes the
+shape of the distribution, while X is exponentially distributed, Z
+becomes approximately symmetric and shifted. So q-q plot reveals that X
+and Z have different distributions.
 
-Dependent pairs: X and Z Independent pairs: X and Y We can observe their dependecies on plot above. X and Y are similar because they have the same distribution.
+Dependent pairs: X and Z Independent pairs: X and Y We can observe their
+dependecies on plot above. X and Y are similar because they have the
+same distribution.
 
 ```         
 ------------------------------------------------------------------------
 ```
 
-2.  You toss a fair coin three times and a random variable $X$ records how many times the coin shows Heads. You convince your friend that they should play a game with the following payoff: every round (equivalent to three coin tosses) will cost £$1$. They will receive £$0.5$ for every coin showing Heads. What is the expected value and the variance of the random variable $Y := 0.5X-1$?
+2.  You toss a fair coin three times and a random variable $X$ records
+    how many times the coin shows Heads. You convince your friend that
+    they should play a game with the following payoff: every round
+    (equivalent to three coin tosses) will cost £$1$. They will receive
+    £$0.5$ for every coin showing Heads. What is the expected value and
+    the variance of the random variable $Y := 0.5X-1$?
 
     To answer this,
 
-    1.  Explain what type of random variable is X: It is **Binomially distributed**
+    1.  Explain what type of random variable is X: It is **Binomially
+        distributed**
 
     Explanation:
 
-    -   Each coin toss is an independent Bernoulli trial with two outcomes: Head (success) or Tail (failure).
+    -   Each coin toss is an independent Bernoulli trial with two
+        outcomes: Head (success) or Tail (failure).
 
-    -   The probability of success (Head) is p = 0.5. - There are n = 3 independent trials.
+    -   The probability of success (Head) is p = 0.5. - There are n = 3
+        independent trials.
 
     So $X \sim \text{Binomial}(n = 3, p = 0.5)$
 
-3.  What are the expected value and variance of X? Simulate realizations $x_1,x_2,\dots,x_{100}$ of $X$ to calculate the values of sample mean $\overline{\mathbf{X}}$ and sample variance $s^2 = \frac{\sum_{i=1}^{n}{(x_i - \overline{x})^{2}}}{n-1}$. Comment on the results;
+3.  What are the expected value and variance of X? Simulate realizations
+    $x_1,x_2,\dots,x_{100}$ of $X$ to calculate the values of sample
+    mean $\overline{\mathbf{X}}$ and sample variance
+    $s^2 = \frac{\sum_{i=1}^{n}{(x_i - \overline{x})^{2}}}{n-1}$.
+    Comment on the results;
 
     ```{r}
     # Theoretical
@@ -652,7 +931,11 @@ Dependent pairs: X and Z Independent pairs: X and Y We can observe their depende
     cat("Sample Variance (s2_x):", s2_x, "\n")
     ```
 
-4.  What are the expected value and variance of Y? Simulate realizations $y_1,y_2,\dots,y_{100}$ of $Y$ to calculate the values of sample mean $\overline{\mathbf{Y}}$ and sample variance $s^2 = \frac{\sum_{i=1}^{n}{(y_i - \overline{y})^{2}}}{n-1}$. Comment on the results;
+4.  What are the expected value and variance of Y? Simulate realizations
+    $y_1,y_2,\dots,y_{100}$ of $Y$ to calculate the values of sample
+    mean $\overline{\mathbf{Y}}$ and sample variance
+    $s^2 = \frac{\sum_{i=1}^{n}{(y_i - \overline{y})^{2}}}{n-1}$.
+    Comment on the results;
 
     ```{r}
     # Theoretical
@@ -677,10 +960,12 @@ Dependent pairs: X and Z Independent pairs: X and Y We can observe their depende
     cat("Sample Variance (s2_y):", s2_y, "\n")
     ```
 
-**Do not forget to include several sentences summarizing your work and the conclusions you have made!**
+**Do not forget to include several sentences summarizing your work and
+the conclusions you have made!**
 
 ------------------------------------------------------------------------
 
 ### General summary and conclusions
 
-Summarize here what you've done, whether you solved the tasks, what difficulties you had etc.
+Summarize here what you've done, whether you solved the tasks, what
+difficulties you had etc.
